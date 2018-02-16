@@ -1,0 +1,4 @@
+@echo off
+call vim_setenv.bat
+"%VIM_HOME%\vim.exe" %*
+call vim_setenv.bat unset
