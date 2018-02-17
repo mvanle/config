@@ -28,7 +28,7 @@ set diffexpr=MyDiff_Fix_Vim74_E97_QuoteBug()
 "let STL = "%<%f%m%r%(\ (type:%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P"
 "let STL = "%<%f%m%r%(\\ (type:%Y)%)%(\\ %a%)\\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\\ %P"
 
-"/* See $VIMRUNTIME\doc\usr_21.txt: *21.3*	Remembering information; viminfo
+"/* See $VIMRUNTIME\doc\usr_21.txt: *21.3*  Remembering information; viminfo
 " * Also see ":help viminfo"
 " * Default is '100,<50,s10,h,rA:,rB: */
 "set viminfo+=f1
@@ -148,21 +148,21 @@ function! MoveWithinLine(direction)
 endfunction
 
 function! ScrollFullWindow(direction)
-	let jumpTo = "keepj normal! "
-	if (a:direction ==? "up")
-		let nextLine = line("w0") - 1
-		if nextLine > 0
-			exe jumpTo . nextLine . "Gzb"
-		endif
-	elseif (a:direction ==? "down")
-		let nextLine = line("w$") + 1
-		exe jumpTo . nextLine . "Gzt"
-	endif
+    let jumpTo = "keepj normal! "
+    if (a:direction ==? "up")
+        let nextLine = line("w0") - 1
+        if nextLine > 0
+            exe jumpTo . nextLine . "Gzb"
+        endif
+    elseif (a:direction ==? "down")
+        let nextLine = line("w$") + 1
+        exe jumpTo . nextLine . "Gzt"
+    endif
 endfunction
 
 "/* Get date and time */
 function! NotepadF5()
-	return strftime("%a %H:%M %d %b %Y")
+    return strftime("%a %H:%M %d %b %Y")
 endfunction
 
 "/* http://superuser.com/questions/697847/cant-run-vimdiff-7-4-on-windows-7
@@ -226,4 +226,4 @@ endfunction
 
 "; -----
 "; Preferred modeline for _vimrc (the " is required to prevent source errors)
-";	vim:ro:nomodifiable
+";  vim:ro:nomodifiable
