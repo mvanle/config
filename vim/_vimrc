@@ -110,7 +110,7 @@ map <End> :call MoveWithinLine("$")<CR>
 imap <Up> <C-O>:exe "normal! gk"<CR>
 imap <Down> <C-O>:exe "normal! gj"<CR>
 imap <Home> <C-O>:call MoveWithinLine("0")<CR>
-imap <End> <C-O>:call MoveWithinLine("$")<CR>
+imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 
 "/*
 " * Alternative defaults
@@ -135,23 +135,45 @@ nmap <silent> <A-Down> :wincmd j<CR>
 nmap <silent> <A-Left> :wincmd h<CR>
 nmap <silent> <A-Right> :wincmd l<CR>
 
+"/*
+" * Words
+" */
+
+imap \d [done] 
+imap \u [updated] 
+imap \p [pending] 
+imap \c [cancelled] 
+
 "/******************************************************************************
 " * Functions
 " ******************************************************************************/
 
-function! MoveWithinLine(direction)
+"/*
+" * Movement
+" */
+
+function! MoveWithinLine(direction, ...)
+    let a:mode = get(a:, 1, "n")
     let move = "norm! "
-    if &wrap == 1
+    if (&wrap == 1)
         let move = move . "g"
     endif
     exe move . a:direction
+
+    "/* Correctly place cursor at EOL for inserts */
+    if (&wrap == 1 && a:direction == "$" && a:mode == "i")
+        let editableWinWidth = GetEditableWinWidth()
+        if (virtcol(".") + 1 < editableWinWidth || IsLastLineofWrappedLine())
+           exe ":startinsert!"
+        endif
+    endif
 endfunction
 
 function! ScrollFullWindow(direction)
     let jumpTo = "keepj normal! "
     if (a:direction ==? "up")
         let nextLine = line("w0") - 1
-        if nextLine > 0
+        if (nextLine > 0)
             exe jumpTo . nextLine . "Gzb"
         endif
     elseif (a:direction ==? "down")
@@ -159,6 +181,10 @@ function! ScrollFullWindow(direction)
         exe jumpTo . nextLine . "Gzt"
     endif
 endfunction
+
+"/*
+" * Other
+" */
 
 "/* Get date and time */
 function! NotepadF5()
@@ -194,7 +220,34 @@ function! MyDiff_Fix_Vim74_E97_QuoteBug()
     if exists('l:shxq_sav')
        let &shellxquote=l:shxq_sav
     endif
- endfunction
+endfunction
+
+"/******************************************************************************
+" * Helpers
+" */
+
+function! GetEditableWinWidth()
+    return winwidth(".") - GetVisibleStartOfLineColumnNumber()
+endfunction
+
+function! GetVisibleStartOfLineColumnNumber()
+    let columnNumber = 1
+    let numberWidth = 0
+    if (&nu == 1)
+        let numberWidth = &numberwidth
+        let maxLinesLength = len(line('$'))
+
+        if (maxLinesLength >= &numberwidth)
+            let numberWidth = maxLinesLength + 1
+        endif
+    endif
+    return columnNumber + numberWidth
+endfunction
+
+function! IsLastLineofWrappedLine()
+    let lastColumn = virtcol('$')
+    return (virtcol('.') > lastColumn - fmod(lastColumn, GetEditableWinWidth() + 1))
+endfunction
 
 "/******************************************************************************
 " * Scripts
@@ -211,7 +264,7 @@ augroup LargeFile
     autocmd BufReadPre * let f=getfsize(expand("<afile>")) | if f > g:LargeFile || f == -2 | call LargeFile() | endif
 augroup END
 
-function LargeFile()
+function! LargeFile()
     "; no syntax highlighting etc
     set eventignore+=FileType
     "; save memory when other file is viewed
