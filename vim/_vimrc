@@ -244,7 +244,7 @@ function! GetVisibleStartOfLineColumnNumber()
     return columnNumber + numberWidth
 endfunction
 
-function! IsLastLineofWrappedLine()
+function! IsLastLineOfWrappedLine()
     let lastColumn = virtcol('$')
     return (virtcol('.') > lastColumn - fmod(lastColumn, GetEditableWinWidth() + 1))
 endfunction
