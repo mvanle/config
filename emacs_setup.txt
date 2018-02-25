@@ -1,0 +1,7 @@
+Options -> Set Default Font (fixedsys)
+
+Options -> Customize Emacs -> Custom Themes (deeper-blue)
+
+Options -> Top-level Customization Group -> Faces -> Basic Faces -> Cursor (Background)
+
+Options -> Top-level Customization Group -> Faces -> Basic Faces -> Default (Foreground & Background)
