@@ -109,7 +109,7 @@ map <Home> :call MoveWithinLine("0")<CR>
 map <End> :call MoveWithinLine("$")<CR>
 imap <Up> <C-O>:exe "normal! gk"<CR>
 imap <Down> <C-O>:exe "normal! gj"<CR>
-imap <Home> <C-O>:call MoveWithinLine("0")<CR>
+imap <Home> <C-O>:call MoveWithinLine("^")<CR>
 imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 
 "/*
@@ -163,7 +163,7 @@ function! MoveWithinLine(direction, ...)
     "/* Correctly place cursor at EOL for inserts */
     if (&wrap == 1 && a:direction == "$" && a:mode == "i")
         let editableWinWidth = GetEditableWinWidth()
-        if (virtcol(".") + 1 < editableWinWidth || IsLastLineofWrappedLine())
+        if (virtcol(".") + 1 < editableWinWidth || IsLastLineOfWrappedLine())
            exe ":startinsert!"
         endif
     endif
