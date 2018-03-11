@@ -44,6 +44,7 @@ set ts=4 sw=4 tw=0 shm=at go-=T
 set viewdir=$HOME/vimfiles/views
 set sessionoptions+=unix,slash,resize
 set listchars+=tab:>-,trail:-
+set nrformats+=alpha
 
 "/* 
 " * Status line
