@@ -2,18 +2,26 @@
 " * System
 " ******************************************************************************/
 
-"/* Source the system _vimrc (which also loads vimrc_example.vim) */
-source $VIM/_vimrc
+if stridx(&shell, 'cmd.exe') > 0
+    let vimShellEnvironment = 'windows'
 
-"/******************************************************************************
-" * Override any $VIM/_vimrc settings
-" */
+    "/* Source the system _vimrc (which also loads vimrc_example.vim) */
+    source $VIM/_vimrc
 
-"/* Reset textwidth */
-au! vimrcEx FileType text setlocal tw&
+    "/******************************************************************************
+    " * Override any $VIM/_vimrc settings
+    " */
 
-"/* http://superuser.com/questions/697847/cant-run-vimdiff-7-4-on-windows-7 */
-set diffexpr=MyDiff_Fix_Vim74_E97_QuoteBug()
+    "/* Reset textwidth */
+    au! vimrcEx FileType text setlocal tw&
+
+    "/* http://superuser.com/questions/697847/cant-run-vimdiff-7-4-on-windows-7 */
+    if v:version == 704
+        set diffexpr=MyDiff_Fix_Vim74_E97_QuoteBug()
+    endif
+else
+    let vimShellEnvironment = ''
+endif
 
 "/******************************************************************************
 " * Other settings
@@ -34,17 +42,32 @@ set diffexpr=MyDiff_Fix_Vim74_E97_QuoteBug()
 "set viminfo+=f1
 set viminfo+=c
 
+if $TERM == "xterm"
+"/* Use a line cursor within insert mode and a block cursor everywhere else.
+    " *
+    " * Reference chart of values:
+    " *   Ps = 0  -> blinking block.
+    " *   Ps = 1  -> blinking block (default).
+    " *   Ps = 2  -> steady block.
+    " *   Ps = 3  -> blinking underline.
+    " *   Ps = 4  -> steady underline.
+    " *   Ps = 5  -> blinking bar (xterm).
+    " *   Ps = 6  -> steady bar (xterm).
+    let &t_SI = "\e[6 q"
+    let &t_EI = "\e[2 q"
+endif
+
 "/******************************************************************************
 " * Options                                                                   
 " * (See ":options" for interactive settings and ":help options" for details) 
 " ******************************************************************************/
 
-set nobk wb nows
-set ts=4 sw=4 tw=0 shm=at go-=T 
+set ts=4 sw=4 tw=0 nows
+set nobk wb 
+set shm=at go-=T 
 set viewdir=$HOME/vimfiles/views
 set sessionoptions+=unix,slash,resize
-set listchars+=tab:>-,trail:-
-set nrformats+=alpha
+set listchars+=tab:>-,trail:-,precedes:<,extends:>
 
 "/* 
 " * Status line
@@ -73,7 +96,7 @@ set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),
 
 "/* Like Notepad */
 if has('gui_running')
-  set guifont=Lucida_Console:h10:cANSI
+  set guifont=Lucida_Console:h11:cANSI
 endif
 
 "/******************************************************************************
@@ -88,10 +111,12 @@ endif
 unmap Q
 
 "/* Unmap some unwanted/redundant mswin.vim bindings (undo, redo, select all, etc) */
-unmap <C-Y>
-iunmap <C-Y>
-iunmap <C-A>
-"unmap <C-Z>
+if vimShellEnvironment == 'windows'
+    unmap <C-Y>
+    iunmap <C-Y>
+    iunmap <C-A>
+    "unmap <C-Z>
+endif
 
 "/*
 " * Scrolling
@@ -110,7 +135,7 @@ map <Home> :call MoveWithinLine("0")<CR>
 map <End> :call MoveWithinLine("$")<CR>
 imap <Up> <C-O>:exe "normal! gk"<CR>
 imap <Down> <C-O>:exe "normal! gj"<CR>
-imap <Home> <C-O>:call MoveWithinLine("^")<CR>
+imap <Home> <C-O>:call MoveWithinLine("0")<CR>
 imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 
 "/*
@@ -164,7 +189,7 @@ function! MoveWithinLine(direction, ...)
     "/* Correctly place cursor at EOL for inserts */
     if (&wrap == 1 && a:direction == "$" && a:mode == "i")
         let editableWinWidth = GetEditableWinWidth()
-        if (virtcol(".") + 1 < editableWinWidth || IsLastLineOfWrappedLine())
+        if (virtcol(".") + 1 < editableWinWidth || IsLastLineofWrappedLine())
            exe ":startinsert!"
         endif
     endif
