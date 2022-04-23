@@ -1,0 +1,87 @@
+export PATH=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
+
+export PS1='[\t \W] $ '
+
+export JAVA_HOME='c:/Program Files/Java/jdk1.8.0_231/'
+mvn='/c/Users/mle10/home/programs/apache-maven-3.6.1/bin/mvn'
+
+#/********************************************************************************
+# * Options
+# ********************************************************************************/
+
+shopt -s histverify histreedit globstar
+stty -ixon
+
+#/********************************************************************************
+# * Alias
+# ********************************************************************************/
+
+alias h=history
+alias l='ls -lAF'
+alias ll='ls -al --color | less -R'
+alias pd='pushd .'
+alias ph='dirs -p'
+
+#/********************************************************************************
+# * Git
+# */
+
+alias g=git
+alias ga='git add'
+alias gb='git rev-parse --abbrev-ref @'
+alias gd='git diff'
+alias gl='git log --graph --name-status --abbrev-commit'
+alias gr='git reflog --date=iso'
+alias gs='git status -s --untracked-files=no'
+alias gsu='git status -s --ignored=no'
+alias gsh='git show'
+
+#/********************************************************************************
+# * Functions 
+# ********************************************************************************/
+
+cdHistoryFile=~/.bash_cdhistory
+cd() {
+    builtin cd $@ && echo $PWD >> $cdHistoryFile
+}
+
+cdh() {
+    if [ "$1" == '-?' ]; then 
+        cat << USAGE
+cdhistory: cdh [n]
+
+Options:
+  n         Get the latest number of unique directories [default: 15]
+
+Selections:
+  q         Quit
+  .         Display the original list
+  .<regex>  Filter the current list
+  #         Change directory
+USAGE
+        return 1
+    fi
+    local IFS=$'\n'
+    local directories=()
+    #//for line in `tac $cdHistoryFile | head -n ${1:-15}`; do directories+=($line); done
+    for line in `tac $cdHistoryFile`; do directories+=($line); done
+    cnt=${#directories[@]}
+    for ((i = 0; i < cnt - 1; i++)) {
+        for ((j = i + 1; j < cnt; j++)) {
+            [ "${directories[$i]}" == "${directories[$j]}" ] && unset directories[$j]
+        }
+    }
+    directories=("${directories[@]:1:${1:-15}}")
+    local select=0 subset=("${directories[@]}") 
+    until [ $select -eq 1 ]; do
+        select dir in ${subset[@]}; do 
+            case $REPLY in 
+                q) select=1; break ;; 
+               \.) subset=("${directories[@]}"); break ;;
+               .*) subset=($(printf '%s\n' "${subset[@]}" | egrep "${REPLY:1}")); break ;;
+                *) cd $dir; select=1; break
+            esac
+        done
+    done
+}
+
