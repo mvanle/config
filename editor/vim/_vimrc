@@ -73,12 +73,16 @@ set listchars+=tab:>-,trail:-,precedes:<,extends:>
 " * Status line
 " */
 
+function! WinSizeXY()
+    return winwidth(0) . ',' . winheight(0)
+endfunction
+
 "set statusline=%<%f%m%r%(\ (type:%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f%m%r%(\ (%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %P
-set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ #%{winnr()}\ %P
-set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),%c%V%)\ #%{winnr()}\ %P%)
+set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %{WinSizeXY()}\ #%{winnr()}\ %P
+set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),%c%V%)\ %{WinSizeXY()}\ #%{winnr()}\ %P%)
 "exec "set statusline=".STL
 "exec "set rulerformat=".STL
 "set rulerformat=%<%f%m%r%(\ (type:%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
@@ -94,9 +98,13 @@ set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),
 " * Fonts
 " ******************************************************************************/
 
-"/* Like Notepad */
 if has('gui_running')
-  set guifont=Lucida_Console:h11:cANSI
+    if vimShellEnvironment == 'windows'
+        "/* Like Notepad */
+        set guifont=Lucida_Console:h11:cANSI
+    else 
+        set guifont=Monospace\ 11
+    endif
 endif
 
 "/******************************************************************************
@@ -138,6 +146,10 @@ imap <Down> <C-O>:exe "normal! gj"<CR>
 imap <Home> <C-O>:call MoveWithinLine("0")<CR>
 imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 
+"//"/* Cursor binding */
+"//nnoremap k :call Crb("k")<CR>
+"//nnoremap j :call Crb("j")<CR>
+
 "/*
 " * Alternative defaults
 " */
@@ -174,7 +186,7 @@ imap \c [cancelled]
 " * Functions
 " ******************************************************************************/
 
-"/*
+"/********************************************************************************
 " * Movement
 " */
 
@@ -208,7 +220,69 @@ function! ScrollFullWindow(direction)
     endif
 endfunction
 
+"//function! Crb(key)
+"//    exe 'normal!' v:count . a:key
+"//    "echo v:count v:count1
+"//    "let l:currentWindow = winnr()
+"//    "let l:cmd = 'normal! ' . v:count1 . a:key 
+"//    "if (exists('g:crb'))
+"//    "    if (a:key == ("j" || "k"))
+"//    "        for l:targetWindow in g:crb
+"//    "            exe targetWindow . "wincmd w"
+"//    "            exe l:cmd | set cul
+"//    "        endfor
+"//    "    endif
+"//    "else
+"//    "    exe l:cmd
+"//    "    "normal! v:count a:key
+"//    "endif
+"//    "exe l:currentWindow . "wincmd w"
+"//endfunction
+
 "/*
+" * Helpers
+" */
+
+function! GetEditableWinWidth()
+    return winwidth(".") - GetVisibleStartOfLineColumnNumber()
+endfunction
+
+function! GetVisibleStartOfLineColumnNumber()
+    let columnNumber = 1
+    let numberWidth = 0
+    if (&nu == 1)
+        let numberWidth = &numberwidth
+        let maxLinesLength = len(line('$'))
+
+        if (maxLinesLength >= &numberwidth)
+            let numberWidth = maxLinesLength + 1
+        endif
+    endif
+    return columnNumber + numberWidth
+endfunction
+
+function! IsLastLineOfWrappedLine()
+    let lastColumn = virtcol('$')
+    return (virtcol('.') > lastColumn - fmod(lastColumn, GetEditableWinWidth() + 1))
+endfunction
+
+"/********************************************************************************
+" * Search
+" */
+
+"/* Search for the ... arguments separated with whitespace (if no '!'),
+" or with non-word characters (if '!' added to command).
+" https://vim.fandom.com/wiki/Search_across_multiple_lines#Searching_over_multiple_lines */
+function! SearchMultiLine(bang, ...)
+  if a:0 > 0
+    "//let sep = (a:bang) ? '\_W\+' : '\_s\+'
+    let sep = (a:bang) ? '\(\_.\{-}\)' : '\_s\+'
+    let @/ = join(a:000, sep)
+  endif
+endfunction
+command! -bang -nargs=* -complete=tag S call SearchMultiLine(<bang>0, <f-args>)|normal! /<C-R>/<CR>
+
+"/********************************************************************************
 " * Other
 " */
 
@@ -248,32 +322,6 @@ function! MyDiff_Fix_Vim74_E97_QuoteBug()
     endif
 endfunction
 
-"/******************************************************************************
-" * Helpers
-" */
-
-function! GetEditableWinWidth()
-    return winwidth(".") - GetVisibleStartOfLineColumnNumber()
-endfunction
-
-function! GetVisibleStartOfLineColumnNumber()
-    let columnNumber = 1
-    let numberWidth = 0
-    if (&nu == 1)
-        let numberWidth = &numberwidth
-        let maxLinesLength = len(line('$'))
-
-        if (maxLinesLength >= &numberwidth)
-            let numberWidth = maxLinesLength + 1
-        endif
-    endif
-    return columnNumber + numberWidth
-endfunction
-
-function! IsLastLineOfWrappedLine()
-    let lastColumn = virtcol('$')
-    return (virtcol('.') > lastColumn - fmod(lastColumn, GetEditableWinWidth() + 1))
-endfunction
 
 "/******************************************************************************
 " * Scripts

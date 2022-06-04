@@ -1,0 +1,17 @@
+[user]
+    name = mvanle
+    email = mvanle@git
+[core]
+    editor = vim
+    longpaths = true
+[diff]
+    mnemonicPrefix = true
+[alias]
+    b      = branch
+    ci     = commit
+    co     = checkout
+    f      = fetch
+    l      = log
+    origin = config --get remote.origin.url
+    s      = status
+    st     = stash

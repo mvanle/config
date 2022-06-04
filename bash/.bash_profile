@@ -27,14 +27,16 @@ alias ph='dirs -p'
 # */
 
 alias g=git
-alias ga='git add'
-alias gb='git rev-parse --abbrev-ref @'
-alias gd='git diff'
-alias gl='git log --graph --name-status --abbrev-commit'
-alias gr='git reflog --date=iso'
-alias gs='git status -s --untracked-files=no'
-alias gsu='git status -s --ignored=no'
-alias gsh='git show'
+alias ga='g add'
+alias gb='g rev-parse --abbrev-ref @'
+alias gd='g diff'
+alias gl='g log --graph --name-status --abbrev-commit'
+alias glo='g log --graph --abbrev-commit --oneline'
+alias gr='g reflog --date=iso'
+alias gs='g status -s --untracked-files=no'
+alias gsu='g status -s --ignored=no'
+alias gsh='g show'
+alias gst='g stash list'
 
 #/********************************************************************************
 # * Functions 
@@ -85,3 +87,4 @@ USAGE
     done
 }
 
+#/* vim: set nu cul nows et: */
