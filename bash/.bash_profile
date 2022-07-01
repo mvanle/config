@@ -29,6 +29,7 @@ alias ph='dirs -p'
 alias g=git
 alias ga='g add'
 alias gb='g rev-parse --abbrev-ref @'
+alias gbt='g branch --sort=-committerdate'
 alias gci='g commit'
 alias gco='g checkout'
 alias gco-='g checkout @{-1}'
