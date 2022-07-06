@@ -79,7 +79,7 @@ USAGE
             [ "${directories[$i]}" == "${directories[$j]}" ] && unset directories[$j]
         }
     }
-    directories=("${directories[@]:1:${1:-15}}")
+    directories=("${directories[@]:0:${1:-15}}")    #// Splice the top results
     local select=0 subset=("${directories[@]}") 
     until [ $select -eq 1 ]; do
         select dir in ${subset[@]}; do 
