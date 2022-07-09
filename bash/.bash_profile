@@ -50,7 +50,7 @@ alias gst='g stash list'
 
 cdHistoryFile=~/.bash_cdhistory
 cd() {
-    builtin cd $@ && echo $PWD >> $cdHistoryFile
+    builtin cd "$@" && echo $PWD >> $cdHistoryFile
 }
 
 cdh() {
