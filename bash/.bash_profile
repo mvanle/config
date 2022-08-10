@@ -30,7 +30,6 @@ alias g=git
 alias ga='g add'
 alias gb='g rev-parse --abbrev-ref @'
 alias gbt='g branch --sort=-committerdate'
-alias gbtt="gbt --format='%(if)%(HEAD)%(then)%(HEAD) %(color:green)%(else) %(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' --color=always | column -ts'|'"
 alias gci='g commit'
 alias gco='g checkout'
 alias gco-='g checkout @{-1}'
@@ -44,6 +43,10 @@ alias gs='g status -s --untracked-files=no'
 alias gsu='g status -s --ignored=no'
 alias gsh='g show'
 alias gst='g stash list'
+
+gbtt() {
+    gbt --format='%(if)%(HEAD)%(then)%(HEAD) %(color:green)%(else) %(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'
+}
 
 #/********************************************************************************
 # * Functions 
