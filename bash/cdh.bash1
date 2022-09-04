@@ -1,0 +1,55 @@
+cdHistoryFile=~/.bash_cdhistory
+cd() {
+    builtin cd "$@" && echo $PWD >> $cdHistoryFile
+}
+
+cdh() {
+    local pid=$$
+    local workingDir=~/.cdh
+    local directories=$workingDir/${cdHistoryFile#*.}.$pid
+    local visitedLine
+
+    if [ "$1" = '-?' ]; then 
+        cat << USAGE
+cdhistory: cdh [n]
+
+Options:
+  n         Get the latest number of unique directories [default: 15]
+
+Selections:
+  q         Quit
+  .         Display the original list
+  .<regex>  Filter the current list
+  #         Change directory
+USAGE
+        return 1
+    fi
+
+    [ ! -d $workingDir ] && mkdir -p $workingDir
+
+    #/* Remove duplicates */
+    for line in `tac $cdHistoryFile`; do 
+        if ! echo "$visitedLine" | grep "#$line#" > /dev/null; then
+            echo "$line" >> $directories
+        fi
+        visitedLine="$visitedLine#$line#"
+    done
+
+    directoriesHead=$directories.head
+    head -n${1:-15} $directories > $directoriesHead     #// Splice the top results
+    local select=0 subset=$directoriesHead
+    until [ $select -eq 1 ]; do
+        select dir in `cat $subset`; do 
+            case $REPLY in 
+                q) select=1; break ;; 
+               \.) subset=$directoriesHead; break ;;
+               .*) subset=$directoriesHead.subset
+                   egrep "$REPLY" $directoriesHead > $subset
+                   break ;;
+                *) cd $dir; select=1; break
+            esac
+        done
+    done
+
+    rm $directories*
+}
