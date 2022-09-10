@@ -27,6 +27,29 @@ alias ph='dirs -p'
 # * Git
 # */
 
+gitCmdLogger() {
+    local cmd="command git $*"
+    if echo $cmd | egrep '(fetch)|(merge)|(push)|(pull)' &> /dev/null; then
+        if local logDir=`command git rev-parse --git-dir 2> /dev/null`/logs; then
+            if [ -w "$logDir" ]; then 
+                local logfile=$logDir/git.log
+                echo "--- `date` - $cmd" >> $logfile
+                eval $cmd 2>&1 | tee -a $logfile
+            else
+                eval $cmd
+            fi
+        else
+            eval $cmd
+        fi
+    else
+        eval $cmd
+    fi
+}
+
+git() {
+    gitCmdLogger "$@"
+}
+
 alias g=git
 alias ga='g add'
 alias gb='g rev-parse --abbrev-ref @'
@@ -35,6 +58,7 @@ alias gci='g commit'
 alias gco='g checkout'
 alias gco-='g checkout @{-1}'
 alias gd='g diff'
+alias gdir='git rev-parse --git-dir'
 alias gf='g fetch'
 alias gl='g log --graph --name-status --abbrev-commit'
 alias glo='g log --graph --abbrev-commit --oneline'
@@ -45,8 +69,12 @@ alias gsu='g status -s --ignored=no'
 alias gsh='g show'
 alias gst='g stash list'
 
+gm() {
+    local gitDir=`gdir` && grep -Hn . $gitDir/MERGE* $gitDir/REBASE* 2>/dev/null
+}
+
 gbtt() {
-    gbt --format='%(if)%(HEAD)%(then)%(HEAD)}%(color:green)%(else) }%(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'
+    gbt --format="'%(if)%(HEAD)%(then)%(HEAD)}%(color:green)%(else) }%(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'"
 }
 
 #/********************************************************************************
