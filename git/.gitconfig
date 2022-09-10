@@ -6,6 +6,7 @@
     longpaths = true
 [diff]
     mnemonicPrefix = true
+    #//context = 5
 [alias]
     b      = branch
     ci     = commit

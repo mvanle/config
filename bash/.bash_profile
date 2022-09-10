@@ -1,6 +1,7 @@
 export PATH=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
 
 export PS1='[\t \W] $ '
+export LESS="$LESS -i -R -X -F"
 
 export JAVA_HOME='c:/Program Files/Java/jdk1.8.0_231/'
 mvn='/c/Users/mle10/home/programs/apache-maven-3.6.1/bin/mvn'
@@ -45,7 +46,7 @@ alias gsh='g show'
 alias gst='g stash list'
 
 gbtt() {
-    gbt --format='%(if)%(HEAD)%(then)%(HEAD) %(color:green)%(else) %(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'
+    gbt --format='%(if)%(HEAD)%(then)%(HEAD)}%(color:green)%(else) }%(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'
 }
 
 #/********************************************************************************
