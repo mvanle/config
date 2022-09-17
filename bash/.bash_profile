@@ -1,7 +1,10 @@
 export PATH=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
 
 export PS1='[\t \W] $ '
-export LESS="$LESS -i -R -X -F"
+
+LESS_OPTS='-i -R -X -F'
+LESS_PROMPT_E='-P=%f %lt/%L?c,%c. p%dt?D/%D. ?Pt%Pt?PB-%PB\% ..b\:%bt?B/%B .?mf\:%i/%m .?e(END) ?xn\:%x..%t'
+export LESS="$LESS_OPTS $LESS_PROMPT_E"
 
 export JAVA_HOME='c:/Program Files/Java/jdk1.8.0_231/'
 mvn='/c/Users/mle10/home/programs/apache-maven-3.6.1/bin/mvn'
