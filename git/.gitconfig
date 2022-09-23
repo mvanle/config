@@ -11,8 +11,10 @@
     b      = branch
     ci     = commit
     co     = checkout
+    d      = diff
     f      = fetch
     l      = log
     origin = config --get remote.origin.url
     s      = status
+    sh     = show
     st     = stash
