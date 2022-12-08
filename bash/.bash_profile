@@ -32,11 +32,13 @@ alias ph='dirs -p'
 
 gitCmdLogger() {
     local cmd="command git $*"
+    local currentBranch=`command git rev-parse --abbrev-ref @`
     if echo $cmd | egrep '(fetch)|(merge)|(push)|(pull)' &> /dev/null; then
         if local logDir=`command git rev-parse --git-dir 2> /dev/null`/logs; then
-            if [ -w "$logDir" ]; then 
+            if [ -w "$logDir" ]; then
                 local logfile=$logDir/git.log
                 echo "--- `date` - $cmd" >> $logfile
+                echo "Branch: $currentBranch" >> $logfile
                 eval $cmd 2>&1 | tee -a $logfile
             else
                 eval $cmd
