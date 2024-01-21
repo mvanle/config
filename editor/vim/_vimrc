@@ -68,21 +68,22 @@ set shm=at go-=T
 set viewdir=$HOME/vimfiles/views
 set sessionoptions+=unix,slash,resize
 set listchars+=tab:>-,trail:-,precedes:<,extends:>
+set noundofile
 
 "/* 
 " * Status line
 " */
 
 function! WinSizeXY()
-    return winwidth(0) . ',' . winheight(0)
+    return winwidth(0) . 'x' . winheight(0)
 endfunction
 
 "set statusline=%<%f%m%r%(\ (type:%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f%m%r%(\ (%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %P
-set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %{WinSizeXY()}\ #%{winnr()}\ %P
-set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),%c%V%)\ %{WinSizeXY()}\ #%{winnr()}\ %P%)
+set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %{&fileformat}\ %{WinSizeXY()}\ #%{winnr()}\ %P
+set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),%c%V%)\ %{&fileformat}\ %{WinSizeXY()}\ #%{winnr()}\ %P%)
 "exec "set statusline=".STL
 "exec "set rulerformat=".STL
 "set rulerformat=%<%f%m%r%(\ (type:%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
@@ -124,6 +125,14 @@ if vimShellEnvironment == 'windows'
     iunmap <C-Y>
     iunmap <C-A>
     "unmap <C-Z>
+endif
+
+"/* Standard cut-copy-paste behaviour */
+if vimShellEnvironment == 'windows'
+    vmap <C-c> "+yi
+    vmap <C-x> "+c
+    vmap <C-v> c<ESC>"+p
+    imap <C-v> <C-r><C-o>+
 endif
 
 "/*
