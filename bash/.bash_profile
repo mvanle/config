@@ -21,6 +21,8 @@ stty -ixon
 # ********************************************************************************/
 
 alias h=history
+alias j=jobs
+alias cd-='cd -'
 alias l='ls -lAF'
 alias ll='ls -al --color | less -R'
 alias pd='pushd .'
@@ -89,6 +91,10 @@ gbtt() {
 cdHistoryFile=~/.bash_cdhistory
 cd() {
     builtin cd "$@" && echo $PWD >> $cdHistoryFile
+}
+
+cdl() {
+    cd "$@" && l
 }
 
 cdh() {
