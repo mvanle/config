@@ -1,4 +1,6 @@
-export PATH=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
+myPath=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
+
+export PATH="$(echo $PATH | sed "s#(.*)(:$myPath)#\1#"):$myPath"
 
 export PS1='[\t \W] $ '
 
