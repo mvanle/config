@@ -22,13 +22,14 @@ stty -ixon
 # * Alias
 # ********************************************************************************/
 
+alias cd-='cd -'
 alias h=history
 alias j=jobs
-alias cd-='cd -'
 alias l='ls -lAF'
 alias ll='ls -al --color | less -R'
 alias pd='pushd .'
 alias ph='dirs -p'
+alias rp=realpath
 
 #/********************************************************************************
 # * Git
@@ -70,6 +71,7 @@ alias gd='g diff'
 alias gdir='git rev-parse --git-dir'
 alias gf='g fetch'
 alias gl='g log --graph --name-status --abbrev-commit'
+alias gls='g ls-files'
 alias glo='g log --graph --abbrev-commit --oneline'
 alias go='g config --get remote.origin.url'
 alias gr='g reflog --date=iso'
