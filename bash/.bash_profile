@@ -81,6 +81,7 @@ alias gsh='g show'
 alias gst='g stash list'
 
 gm() {
+    git b | grep --color=auto rebasing
     local gitDir=`gdir` && grep -Hn . $gitDir/MERGE* $gitDir/REBASE* 2>/dev/null
 }
 
