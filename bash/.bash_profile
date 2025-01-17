@@ -30,7 +30,8 @@ alias bcd='b cd'
 alias cdb=bcd
 alias cd-='cdb -'
 
-alias h=history
+alias h=hints
+alias hi=history
 alias j=jobs
 alias l='ls -lAF'
 alias ll='ls -al --color | less -R'
@@ -45,6 +46,7 @@ alias rp=realpath
 gitCmdLogger() {
     local cmd="command git $*"
     local currentBranch=`command git rev-parse --abbrev-ref @`
+    #//local currentBranch=`command git rev-parse --abbrev-ref HEAD`   #// Git 1.8.x
     if echo $cmd | egrep '(fetch)|(merge)|(push)|(pull)' &> /dev/null; then
         if local logDir=`command git rev-parse --git-dir 2> /dev/null`/logs; then
             if [ -w "$logDir" ]; then
@@ -69,6 +71,7 @@ git() {
 
 alias g=git
 alias ga='g add'
+#//alias gb='g rev-parse --abbrev-ref HEAD'    #// Git 1.8.x
 alias gb='g rev-parse --abbrev-ref @'
 alias gbt='g branch --sort=-committerdate'
 alias gci='g commit'
@@ -78,17 +81,17 @@ alias gd='g diff'
 alias gdir='git rev-parse --git-dir'
 alias gf='g fetch'
 alias gl='g log --graph --name-status --abbrev-commit'
-alias gls='g ls-files'
 alias glo='g log --graph --abbrev-commit --oneline'
+alias gls='g ls-files'
 alias go='g config --get remote.origin.url'
 alias gr='g reflog --date=iso'
 alias gs='g status -s --untracked-files=no'
-alias gsu='g status -s --ignored=no'
 alias gsh='g show'
 alias gst='g stash list'
+alias gsu='g status -s --ignored=no'
 
 gm() {
-    git b | grep --color=auto rebasing
+    g b | grep --color=auto rebasing
     local gitDir=`gdir` && grep -Hn . $gitDir/MERGE* $gitDir/REBASE* 2>/dev/null
 }
 
