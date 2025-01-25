@@ -32,16 +32,47 @@ alias cd-='cdb -'
 
 alias h=hints
 alias hi=history
-alias j=jobs
+alias j='jobs -l'
 alias l='ls -lAF'
 alias ll='ls -al --color | less -R'
 alias pd='pushd .'
-alias ph='dirs -p'
 alias rp=realpath
+
+#/********************************************************************************
+# * Functions
+# ********************************************************************************/
+
+ph() {
+    select dir in `dirs -p | sort | uniq`; do break; done && eval builtin cd $dir
+}
 
 #/********************************************************************************
 # * Git
 # ********************************************************************************/
+
+alias g=git
+alias ga='g add'
+#//alias gb='g rev-parse --abbrev-ref HEAD'    #// Git 1.8.x
+alias gb='g rev-parse --abbrev-ref @'
+alias gbt='g branch --sort=-committerdate'
+alias gci='g commit'
+alias gco='g checkout'
+alias gco-='g checkout @{-1}'
+alias gd='g diff'
+alias gdir='git rev-parse --git-dir'
+alias gf='g fetch'
+alias gl='g log --graph --name-status --abbrev-commit'
+alias glo='g log --graph --abbrev-commit --oneline'
+alias go='g config --get remote.origin.url'
+alias gr='g reflog --date=iso'
+alias gs='g status -s --untracked-files=no'
+alias gsh='g show'
+alias gst='g stash list'
+alias gsu='g status -s --ignored=no'
+
+git() {
+    gitCmdLogger "$@"
+}
 
 gitCmdLogger() {
     local cmd="command git $*"
@@ -65,38 +96,21 @@ gitCmdLogger() {
     fi
 }
 
-git() {
-    gitCmdLogger "$@"
+gbtt() {
+    gbt --format="'%(if)%(HEAD)%(then)%(HEAD)}%(color:green)%(else) }%(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'"
 }
 
-alias g=git
-alias ga='g add'
-#//alias gb='g rev-parse --abbrev-ref HEAD'    #// Git 1.8.x
-alias gb='g rev-parse --abbrev-ref @'
-alias gbt='g branch --sort=-committerdate'
-alias gci='g commit'
-alias gco='g checkout'
-alias gco-='g checkout @{-1}'
-alias gd='g diff'
-alias gdir='git rev-parse --git-dir'
-alias gf='g fetch'
-alias gl='g log --graph --name-status --abbrev-commit'
-alias glo='g log --graph --abbrev-commit --oneline'
-alias gls='g ls-files'
-alias go='g config --get remote.origin.url'
-alias gr='g reflog --date=iso'
-alias gs='g status -s --untracked-files=no'
-alias gsh='g show'
-alias gst='g stash list'
-alias gsu='g status -s --ignored=no'
+gls() {
+    if [ -n "$1" ]; then
+        g diff-tree --no-commit-id --name-only -r $@
+    else
+        g ls-files
+    fi
+}
 
 gm() {
     g b | grep --color=auto rebasing
     local gitDir=`gdir` && grep -Hn . $gitDir/MERGE* $gitDir/REBASE* 2>/dev/null
-}
-
-gbtt() {
-    gbt --format="'%(if)%(HEAD)%(then)%(HEAD)}%(color:green)%(else) }%(end)%(refname:short)%(color:magenta)|%(committerdate:iso)|%(color:yellow)%(objectname:short)|%(color:white)%(subject)' $@ --color=always | column -ts'|'"
 }
 
 #/********************************************************************************
@@ -182,7 +196,7 @@ USAGE
             t)
                 optArg=${lOptArg:-$OPTARG}
                 unset lOptArg
-                if [ -w $optArg ]; then
+                if [ -w $optArg -a ! -d $optArg ]; then
                     historyFile=`realpath -s $optArg`
                 else
                     historyFile=$cdHistoryDir/`basename $optArg`
@@ -193,7 +207,7 @@ USAGE
                 if [ $optArg == . ]; then
                     [ $callingFunction == cd  ] && unset cdHistoryFile
                     [ $callingFunction == cdh ] && unset cdHHistoryFile
-                elif [ -w $optArg ]; then
+                elif [ -w $optArg -a ! -d $optArg ]; then
                     [ $callingFunction == cd  ] && cdHistoryFile=`realpath -s $optArg`
                     [ $callingFunction == cdh ] && cdHHistoryFile=`realpath -s $optArg`
                 else
