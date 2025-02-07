@@ -1,6 +1,6 @@
 myPath=/mingw64/bin:/bin:/usr/bin:/usr/bin/vendor_perl:/usr/bin/core_perl
 
-#/* Prevent perpetual appending of $myPath */
+#/* Prevent perpetual appending of $myPath when re-sourcing */
 export PATH="$(echo $PATH | sed "s#\(.*\)\(:$myPath\)#\1#"):$myPath"
 
 export PS1='[\t \W] $ '
@@ -101,10 +101,10 @@ gbtt() {
 }
 
 gls() {
-    if [ -n "$1" ]; then
+    if [[ (-n "$1") && (! "$1" =~ ^-) ]]; then
         g diff-tree --no-commit-id --name-only -r $@
     else
-        g ls-files
+        g ls-files $@
     fi
 }
 
