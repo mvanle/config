@@ -229,6 +229,7 @@ USAGE
 }
 
 cd() {
+    local retVal
     callingFunction=$FUNCNAME
     parseCdCmdline $*
     if [[ $? -eq 0 ]]; then
@@ -241,7 +242,9 @@ cd() {
             fi
         fi
     fi
+    retVal=$?
     unset historyFile cdNoOp
+    return $retVal
 }
 
 cdl() {
