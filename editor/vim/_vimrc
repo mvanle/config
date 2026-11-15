@@ -70,9 +70,36 @@ set sessionoptions+=unix,slash,resize
 set listchars+=tab:>-,trail:-,precedes:<,extends:>
 set noundofile
 
-"/* 
+"/********************************************************************************
 " * Status line
 " */
+
+hi StatusLine   ctermbg=darkblue ctermfg=white
+hi StatusLineNC ctermbg=darkblue ctermfg=gray
+
+"/* Disable reverse video */
+if has('linux')
+    hi StatusLine   cterm=none
+    hi StatusLineNC cterm=none ctermfg=cyan
+endif
+
+augroup ActiveWindowTracker
+  autocmd!
+  autocmd WinEnter * call FixGtkScrollbar()
+  autocmd VimEnter,WinEnter,BufWinEnter * let w:is_active = 1
+  autocmd WinLeave * let w:is_active = 0 | let g:winLeaveVisited = 1
+augroup END
+
+function! ActiveWindowIndicator()
+    if !exists('g:winLeaveVisited')
+        if (winnr() == 1)
+            return ''''
+        endif
+    elseif get(w:, 'is_active', 0)
+        return '.'
+    endif
+    return ''
+endfunction
 
 function! WinSizeXY()
     return winwidth(0) . 'x' . winheight(0)
@@ -82,7 +109,7 @@ endfunction
 "set statusline=%<%f%m%r%(\ (%Y)%)%(\ %a%)\ %h%w%q%=%-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l(%p%%)/%L,%c%V%)\ %P
 "set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %P
-set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %{&fileformat}\ %{WinSizeXY()}\ #%{winnr()}\ %P
+set statusline=%<%f\ %m%r%=%-30(%(\ (%Y)%)%(%a%)\ %h%w%q%)\ %5(<%n>%)\ %-30.(%l/%L(%p%%),%c%V%)\ %1(%{ActiveWindowIndicator()}%)\ %{&fileformat}\ %{WinSizeXY()}\ #%{winnr()}\ %P
 set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),%c%V%)\ %{&fileformat}\ %{WinSizeXY()}\ #%{winnr()}\ %P%)
 "exec "set statusline=".STL
 "exec "set rulerformat=".STL
@@ -94,6 +121,8 @@ set rulerformat=%60(%m%r%(\ (%Y)%)%(%a%)%(\ %h%w%q%)\ %=<%n>\ %-30.(%l/%L(%p%%),
 
 "colo darkblue_lem
 "runtime colors/darkblue_lem.vim
+
+hi CursorLine ctermbg=darkgrey ctermfg=gray
 
 "/******************************************************************************
 " * Fonts
@@ -112,12 +141,14 @@ endif
 " * Mappings
 " ******************************************************************************/
 
-"/*
+"/********************************************************************************
 " * Remove
 " */
 
 "/* (Q was mapped to 'gq' operator in pre-vim 5.0. Remove to default to Ex mode)
-unmap Q
+if v:version <= 500
+    unmap Q
+endif
 
 "/* Unmap some unwanted/redundant mswin.vim bindings (undo, redo, select all, etc) */
 if vimShellEnvironment == 'windows'
@@ -127,6 +158,10 @@ if vimShellEnvironment == 'windows'
     "unmap <C-Z>
 endif
 
+"/********************************************************************************
+" * Microsoft
+" */
+
 "/* Standard cut-copy-paste behaviour */
 if vimShellEnvironment == 'windows'
     vmap <C-c> "+yi
@@ -135,7 +170,7 @@ if vimShellEnvironment == 'windows'
     imap <C-v> <C-r><C-o>+
 endif
 
-"/*
+"/********************************************************************************
 " * Scrolling
 " */
 
@@ -159,7 +194,7 @@ imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 "//nnoremap k :call Crb("k")<CR>
 "//nnoremap j :call Crb("j")<CR>
 
-"/*
+"/********************************************************************************
 " * Alternative defaults
 " */
 
@@ -167,7 +202,7 @@ imap <End> <C-O>:call MoveWithinLine("$", "i")<CR>
 nnoremap <A-a> <C-a>
 nnoremap <A-x> <C-x>
 
-"/*
+"/********************************************************************************
 " * Custom
 " */
 
@@ -182,7 +217,7 @@ nmap <silent> <A-Down> :wincmd j<CR>
 nmap <silent> <A-Left> :wincmd h<CR>
 nmap <silent> <A-Right> :wincmd l<CR>
 
-"/*
+"/********************************************************************************
 " * Words
 " */
 
@@ -190,6 +225,12 @@ imap \d [done]
 imap \u [updated] 
 imap \p [pending] 
 imap \c [cancelled] 
+
+"/********************************************************************************
+" * Function keys
+" */
+
+map <silent> <F12> :set co=106<CR>
 
 "/******************************************************************************
 " * Functions
@@ -248,9 +289,18 @@ endfunction
 "//    "exe l:currentWindow . "wincmd w"
 "//endfunction
 
-"/*
+"/********************************************************************************
 " * Helpers
 " */
+
+function! HasVerticalSplitLegacy() abort
+    for l:winnr in range(1, winnr('$'))
+        if winwidth(l:winnr) < &columns
+            return 1
+        endif
+    endfor
+    return 0
+endfunction
 
 function! GetEditableWinWidth()
     return winwidth(".") - GetVisibleStartOfLineColumnNumber()
@@ -300,6 +350,21 @@ function! NotepadF5()
     return strftime("%a %H:%M %d %b %Y")
 endfunction
 
+"/********************************************************************************
+" * Bugfix
+" */
+
+"/* Guioptions 'r' and 'L' are mutually exclusive during vertical splits */
+function! FixGtkScrollbar()
+    if has('gui_running') && has('gui_gtk') && has('linux')
+        if HasVerticalSplitLegacy()
+            set go+=lL go-=r go-=R
+        else
+            set go+=r go-=l
+        endif
+    endif
+endfunction
+
 "/* http://superuser.com/questions/697847/cant-run-vimdiff-7-4-on-windows-7
 " * (see ``set diffexpr='' above) */
 function! MyDiff_Fix_Vim74_E97_QuoteBug()
@@ -330,7 +395,6 @@ function! MyDiff_Fix_Vim74_E97_QuoteBug()
        let &shellxquote=l:shxq_sav
     endif
 endfunction
-
 
 "/******************************************************************************
 " * Scripts
